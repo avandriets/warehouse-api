@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  keycloak:
+    image: mihaibob/keycloak:15.0.1
+    restart: always
+    environment:
+      DB_VENDOR: h2
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    ports:
+      - '18080:8080'
+      - '18443:8443'
+    volumes:
+      - products-keycloak:/data
+
+  db:
+    image: postgres:13-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=warehouse
+      - POSTGRES_USER=dbUser
+      - POSTGRES_PASSWORD=userPassword
+
+volumes:
+  dev-db-data:
+  products-keycloak:
