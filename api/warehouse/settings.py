@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'core',
     'user',
+    'mozilla_django_oidc',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -42,7 +44,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'warehouse.middleware.KeycloakMiddleware'
+    # 'warehouse.middleware.KeycloakMiddleware'
 ]
 
 ROOT_URLCONF = 'warehouse.urls'
@@ -119,6 +121,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'core.User'
 
+OIDC_DRF_AUTH_BACKEND = 'warehouse.mozila_auth_backend.MyOIDCAB'
+
 REST_FRAMEWORK = {
     # 'EXCEPTION_HANDLER': 'rest_framework_json_api.exceptions.exception_handler',
     # 'DEFAULT_PARSER_CLASSES': (
@@ -146,7 +150,12 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'user.user_backend.MyBackend',
+        # 'user.user_backend.MyBackend',
+        # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication'
+        # 'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        OIDC_DRF_AUTH_BACKEND,
+        # 'mozilla_django_oidc.contrib.drf.OIDCAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication'
     ],
 }
@@ -155,26 +164,26 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
 }
 
-KEYCLOAK_BEARER_AUTHENTICATION_EXEMPT_PATHS = [
-    'admin', 'account',
-]
-
-CONFIG_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
-
-KEYCLOAK_CLIENT_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsGdXrKR1KxXw0O7ldV5lF7ZTfqRKoX4A+rVA8iJkAhn35zWx3PsPNXVAGTV90vEoAJp3YroUHj7sNq2opXm8HcUJyxLGtpkBJ4ECA+ql1uUjdz/Nw+cZFEW78cdurOPET/WxmWzASAR7FhZMDGYMJ3mQb3CT6GXfK78XTlKua+f83u0cSEoAhBYjSgLpbO7kvGHDuxBVCOV2/RQAK4k+LIdMpgA4uk+idSa1qnVgmWgZwHungxspUzrXrE5G7VN0w8nDQ1DEL75JKVB+IBoXcqa7+BTUn/9Nbs4QTJ2F75jjo/rTwYk+jUx2FQpNlzQpGfccJ57b5ff++yIm2JAaeQIDAQAB
------END PUBLIC KEY-----"""
-
-KEYCLOAK_CONFIG = {
-    'KEYCLOAK_REALM': 'master',
-    'KEYCLOAK_CLIENT_ID': 'warehouse',
-    'KEYCLOAK_DEFAULT_ACCESS': 'ALLOW',  # DENY or ALLOW
-    'KEYCLOAK_AUTHORIZATION_CONFIG': os.path.join(CONFIG_DIR, 'warehouse.json'),
-    'KEYCLOAK_METHOD_VALIDATE_TOKEN': 'DECODE',
-    'KEYCLOAK_SERVER_URL': 'http://127.0.0.1:18080/auth/',
-    'KEYCLOAK_CLIENT_SECRET_KEY': '9OeN-hiqwN23su1zhMmW8VCt4rhLqL1CRuo1xYD2cnU',
-    'KEYCLOAK_CLIENT_PUBLIC_KEY': KEYCLOAK_CLIENT_PUBLIC_KEY,
-}
+# KEYCLOAK_BEARER_AUTHENTICATION_EXEMPT_PATHS = [
+#     'admin', 'account',
+# ]
+#
+# CONFIG_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
+#
+# KEYCLOAK_CLIENT_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
+# MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsGdXrKR1KxXw0O7ldV5lF7ZTfqRKoX4A+rVA8iJkAhn35zWx3PsPNXVAGTV90vEoAJp3YroUHj7sNq2opXm8HcUJyxLGtpkBJ4ECA+ql1uUjdz/Nw+cZFEW78cdurOPET/WxmWzASAR7FhZMDGYMJ3mQb3CT6GXfK78XTlKua+f83u0cSEoAhBYjSgLpbO7kvGHDuxBVCOV2/RQAK4k+LIdMpgA4uk+idSa1qnVgmWgZwHungxspUzrXrE5G7VN0w8nDQ1DEL75JKVB+IBoXcqa7+BTUn/9Nbs4QTJ2F75jjo/rTwYk+jUx2FQpNlzQpGfccJ57b5ff++yIm2JAaeQIDAQAB
+# -----END PUBLIC KEY-----"""
+#
+# KEYCLOAK_CONFIG = {
+#     'KEYCLOAK_REALM': 'master',
+#     'KEYCLOAK_CLIENT_ID': 'warehouse',
+#     'KEYCLOAK_DEFAULT_ACCESS': 'ALLOW',  # DENY or ALLOW
+#     'KEYCLOAK_AUTHORIZATION_CONFIG': os.path.join(CONFIG_DIR, 'warehouse.json'),
+#     'KEYCLOAK_METHOD_VALIDATE_TOKEN': 'DECODE',
+#     'KEYCLOAK_SERVER_URL': 'http://127.0.0.1:18080/auth/',
+#     'KEYCLOAK_CLIENT_SECRET_KEY': '9OeN-hiqwN23su1zhMmW8VCt4rhLqL1CRuo1xYD2cnU',
+#     'KEYCLOAK_CLIENT_PUBLIC_KEY': KEYCLOAK_CLIENT_PUBLIC_KEY,
+# }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -188,3 +197,24 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     # 'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+# AUTHENTICATION_BACKENDS = [
+#     'warehouse.mozila_auth_backend.MyOIDCAB',
+# ]
+
+OIDC_RP_CLIENT_ID = os.environ['OIDC_RP_CLIENT_ID']
+OIDC_RP_CLIENT_SECRET = os.environ['OIDC_RP_CLIENT_SECRET']
+
+# OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv('OIDC_OP_AUTHORIZATION_ENDPOINT',
+#                                            'http://127.0.0.1:18080/auth/realms/master/protocol/openid-connect/auth')
+OIDC_OP_TOKEN_ENDPOINT = os.getenv('OIDC_OP_TOKEN_ENDPOINT',
+                                   'http://127.0.0.1:18080/auth/realms/master/protocol/openid-connect/token')
+OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT',
+                                  'http://127.0.0.1:18080/auth/realms/master/protocol/openid-connect/userinfo')
+# OIDC_OP_JWKS_ENDPOINT = os.getenv('OIDC_OP_JWKS_ENDPOINT',
+#                                   'http://127.0.0.1:18080/auth/realms/master/protocol/openid-connect/certs')
+# OIDC_OP_LOGOUT_ENDPOINT = os.getenv('OIDC_OP_LOGOUT_ENDPOINT',
+#                                     'http://127.0.0.1:18080/auth/realms/master/protocol/openid-connect/logout')
+
+# OIDC_DRF_AUTH_BACKEND = 'mozilla_django_oidc.auth.OIDCAuthenticationBackend'
+# OIDC_DRF_AUTH_BACKEND = 'warehouse.mozila_auth_backend.MyOIDCAB'

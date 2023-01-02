@@ -16,3 +16,4 @@ uwsgi>=2.0.20,<2.1
 python-keycloak==2.6.0
 python-jose==3.3.0
 djangorestframework-simplejwt==5.2.2
+mozilla-django-oidc==3.0.0
