@@ -21,11 +21,10 @@ import logging
 from django.conf import settings
 from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
+from jose import ExpiredSignatureError
 from keycloak import KeycloakOpenID
-from keycloak.exceptions import KeycloakInvalidTokenError, \
-    raise_error_from_response, KeycloakGetError
+from keycloak.exceptions import KeycloakInvalidTokenError
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, NotAuthenticated
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +198,10 @@ class KeycloakMiddleware(MiddlewareMixin):
                                                              options=options)
         except KeycloakInvalidTokenError as e:
             return JsonResponse({"detail": AuthenticationFailed.default_detail},
+                                status=AuthenticationFailed.status_code)
+
+        except ExpiredSignatureError as e:
+            return JsonResponse({"detail": "Signature has expired."},
                                 status=AuthenticationFailed.status_code)
 
         for perm in user_permissions:

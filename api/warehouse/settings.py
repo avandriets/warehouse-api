@@ -15,6 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = int(os.environ.get('DEBUG', default=0))
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(' ')
+OIDC_RP_CLIENT_SECRET = os.environ.get('OIDC_RP_CLIENT_SECRET')
+OIDC_RP_CLIENT_ID = os.environ.get('OIDC_RP_CLIENT_ID')
+OIDC_KEYCLOAK_REALM = os.environ.get('OIDC_KEYCLOAK_REALM')
+KEYCLOAK_SERVER_URL = os.environ.get('KEYCLOAK_SERVER_URL')
+OIDC_RP_CLIENT_PUBLIC_KEY = os.environ.get('OIDC_RP_CLIENT_PUBLIC_KEY')
 
 # Application definition
 
@@ -25,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 3rd party apps
     'django_extensions',  # Great packaged to access abstract models
     'django_filters',  # Used with DRF
     'rest_framework',  # DRF package
@@ -32,6 +38,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'core',
     'user',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -42,7 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'warehouse.middleware.KeycloakMiddleware'
+    'core.keycloak_middleware.KeycloakMiddleware'
 ]
 
 ROOT_URLCONF = 'warehouse.urls'
@@ -141,17 +148,18 @@ REST_FRAMEWORK = {
     # ),
     # 'TEST_REQUEST_DEFAULT_FORMAT': 'vnd.api+json',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 'DEFAULT_PERMISSION_CLASSES': 'rest_framework.permissions.IsAuthenticated',
+    'DEFAULT_PERMISSION_CLASSES': 'rest_framework.permissions.IsAuthenticated',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'user.user_backend.MyBackend',
-        # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication'
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'Warehouse Project API',
+    'DESCRIPTION': 'It is warehouse API project',
+    'VERSION': '1.0.0',
     'COMPONENT_SPLIT_REQUEST': True,
 }
 
@@ -161,30 +169,25 @@ KEYCLOAK_BEARER_AUTHENTICATION_EXEMPT_PATHS = [
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
 
-KEYCLOAK_CLIENT_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsGdXrKR1KxXw0O7ldV5lF7ZTfqRKoX4A+rVA8iJkAhn35zWx3PsPNXVAGTV90vEoAJp3YroUHj7sNq2opXm8HcUJyxLGtpkBJ4ECA+ql1uUjdz/Nw+cZFEW78cdurOPET/WxmWzASAR7FhZMDGYMJ3mQb3CT6GXfK78XTlKua+f83u0cSEoAhBYjSgLpbO7kvGHDuxBVCOV2/RQAK4k+LIdMpgA4uk+idSa1qnVgmWgZwHungxspUzrXrE5G7VN0w8nDQ1DEL75JKVB+IBoXcqa7+BTUn/9Nbs4QTJ2F75jjo/rTwYk+jUx2FQpNlzQpGfccJ57b5ff++yIm2JAaeQIDAQAB
------END PUBLIC KEY-----"""
+KEYCLOAK_CLIENT_PUBLIC_KEY = f'-----BEGIN PUBLIC KEY-----\n{OIDC_RP_CLIENT_PUBLIC_KEY}\n-----END PUBLIC KEY-----'
 
 KEYCLOAK_CONFIG = {
-    'KEYCLOAK_REALM': 'master',
-    'KEYCLOAK_CLIENT_ID': 'warehouse',
+    'KEYCLOAK_REALM': OIDC_KEYCLOAK_REALM,
+    'KEYCLOAK_CLIENT_ID': OIDC_RP_CLIENT_ID,
     'KEYCLOAK_DEFAULT_ACCESS': 'ALLOW',  # DENY or ALLOW
     'KEYCLOAK_AUTHORIZATION_CONFIG': os.path.join(CONFIG_DIR, 'warehouse.json'),
     'KEYCLOAK_METHOD_VALIDATE_TOKEN': 'DECODE',
-    'KEYCLOAK_SERVER_URL': 'http://127.0.0.1:18080/auth/',
-    'KEYCLOAK_CLIENT_SECRET_KEY': '9OeN-hiqwN23su1zhMmW8VCt4rhLqL1CRuo1xYD2cnU',
+    'KEYCLOAK_SERVER_URL': KEYCLOAK_SERVER_URL,
+    'KEYCLOAK_CLIENT_SECRET_KEY': OIDC_RP_CLIENT_SECRET,
     'KEYCLOAK_CLIENT_PUBLIC_KEY': KEYCLOAK_CLIENT_PUBLIC_KEY,
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'RS256',
-    'SIGNING_KEY': SECRET_KEY,
-    # 'VERIFYING_KEY': None,
-    'AUTH_HEADER_TYPES': ('JWT',),
-    # 'USER_ID_FIELD': 'id',
-    # 'USER_ID_CLAIM': 'user_id',
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    # 'TOKEN_TYPE_CLAIM': 'token_type',
+    'SIGNING_KEY': OIDC_RP_CLIENT_SECRET,
+    'VERIFYING_KEY': KEYCLOAK_CLIENT_PUBLIC_KEY,
+    'USER_ID_FIELD': 'email',
+    'USER_ID_CLAIM': 'email',
+    'AUTH_TOKEN_CLASSES': ('core.auth_tokens_backend.BearerToken',),
+    'TOKEN_TYPE_CLAIM': 'typ',
 }
