@@ -35,10 +35,12 @@ INSTALLED_APPS = [
     'django_filters',  # Used with DRF
     'rest_framework',  # DRF package
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'drf_spectacular',
+    # applications
     'core',
     'user',
-    'rest_framework_simplejwt',
+    'catalogue',
 ]
 
 MIDDLEWARE = [
@@ -152,7 +154,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 }
 
