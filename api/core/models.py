@@ -42,6 +42,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
 
+class CommonInfo(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.RESTRICT,
+        related_name='%(app_label)s_%(class)s_related',
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
 class Catalogue(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=255, unique=True)
@@ -50,3 +65,49 @@ class Catalogue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(User, on_delete=models.RESTRICT, related_name='updated_by_user', null=True)
+
+
+class UnitOfMeasures(CommonInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    shortName = models.CharField(max_length=10, unique=True)
+    description = models.CharField(max_length=255)
+
+
+class Store(CommonInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=255)
+
+
+class PriceTypes(CommonInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=255)
+
+
+class Customers(CommonInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    address = models.CharField(max_length=255)
+    tax_number = models.CharField(max_length=100, unique=True)
+    seller = models.BooleanField()
+    description = models.CharField(max_length=255)
+
+
+class Products(CommonInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    printName = models.CharField(max_length=255)
+    barcode = models.CharField(max_length=100)
+    category = models.ForeignKey(Catalogue, on_delete=models.RESTRICT)
+    product_code = models.CharField(max_length=255)
+    height = models.FloatField()
+    width = models.FloatField()
+    length = models.FloatField()
+    weight = models.FloatField()
+    description = models.CharField(max_length=255)
+
+
+class Settings(CommonInfo):
+    current_company = models.ForeignKey(Catalogue, on_delete=models.RESTRICT)

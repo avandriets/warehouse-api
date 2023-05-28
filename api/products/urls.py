@@ -2,16 +2,14 @@ from django.urls import (
     path,
     include,
 )
-
 from rest_framework.routers import DefaultRouter
-
-from catalogue import views
+from products import views
 
 
 router = DefaultRouter()
-router.register('', views.CatalogueViewSet)
+router.register('', views.ProductsViewSet)
 
-app_name = 'catalogue'
+app_name = 'products'
 
 urlpatterns = [
     path('', include(router.urls)),

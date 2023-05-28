@@ -15,3 +15,8 @@ docker-compose -f docker-compose.local.yml up -d
 pip install -r requirements.local.txt
 
 django-admin startapp quickstart
+
+## Run application
+```shell
+./manage.py runserver
+```

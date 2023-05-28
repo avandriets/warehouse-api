@@ -5,13 +5,13 @@ from django.urls import (
 
 from rest_framework.routers import DefaultRouter
 
-from catalogue import views
+from unitofmeasures import views
 
 
 router = DefaultRouter()
-router.register('', views.CatalogueViewSet)
+router.register('', views.UoMViewSet)
 
-app_name = 'catalogue'
+app_name = 'unit_of_measures'
 
 urlpatterns = [
     path('', include(router.urls)),

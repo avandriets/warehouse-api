@@ -7,7 +7,7 @@
             "type": "urn:warehouse:resources:default",
             "ownerManagedAccess": false,
             "attributes": {},
-            "_id": "47daa370-8449-4b0b-8dc6-6c742b7c5498",
+            "_id": "fa714906-cfd9-4268-b612-4ee987851136",
             "uris": [
                 "/*"
             ]
@@ -15,7 +15,7 @@
     ],
     "policies": [
         {
-            "id": "1a2275cf-7523-4f27-afc4-98291a7cf734",
+            "id": "5b39f959-cd18-4c01-8697-3d14ca9e7563",
             "name": "Default Policy",
             "description": "A policy that grants access only for users within this realm",
             "type": "js",
@@ -26,27 +26,27 @@
             }
         },
         {
-            "id": "c4455673-d449-48fd-8a82-358ad513398b",
+            "id": "269a73da-e6fd-4883-be4e-b3a585d6b834",
+            "name": "read-only-policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"warehouse/student\",\"required\":true}]"
+            }
+        },
+        {
+            "id": "d7849177-7c4e-4886-87e5-bb78208e7fbb",
             "name": "super-user-policy",
             "type": "role",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-                "roles": "[{\"id\":\"warehouse/super-user\",\"required\":true}]"
+                "roles": "[{\"id\":\"warehouse/teacher\",\"required\":true}]"
             }
         },
         {
-            "id": "abd1d969-48a9-43a8-891d-1da203d6fa1b",
-            "name": "common-user-policy",
-            "type": "role",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-                "roles": "[{\"id\":\"warehouse/common-user\",\"required\":true}]"
-            }
-        },
-        {
-            "id": "b8f4f60b-2fa1-4267-95bc-139e8d250e4a",
+            "id": "cf00a91d-17b0-41f3-a564-b069aba573f5",
             "name": "Default Permission",
             "description": "A permission that applies to the default resource type",
             "type": "resource",
@@ -58,36 +58,52 @@
             }
         },
         {
-            "id": "0e2dc903-ac95-4889-88cb-be289c60f9cf",
-            "name": "full-acces",
+            "id": "e097c5e4-adc0-4c6b-990b-edb39509b012",
+            "name": "full-access",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-                "scopes": "[\"edit\"]",
+                "scopes": "[\"class:view\",\"class:add\",\"class:update\",\"view\",\"class:delete\"]",
                 "applyPolicies": "[\"super-user-policy\"]"
             }
         },
         {
-            "id": "7dde46c1-3437-42e0-a2bf-d37698591bec",
-            "name": "read-only",
+            "id": "7fd22cf9-de4f-4dd8-ad52-1b7c9e6d84cb",
+            "name": "read-only-access",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-                "scopes": "[\"view\"]",
-                "applyPolicies": "[\"common-user-policy\"]"
+                "scopes": "[\"class:view\",\"view\"]",
+                "applyPolicies": "[\"read-only-policy\"]"
             }
         }
     ],
     "scopes": [
         {
-            "id": "87c1fb0f-8f71-4211-970d-6a247e02783d",
-            "name": "view"
+            "id": "7db5d560-93db-4480-a7a7-578e938a068f",
+            "name": "class:add",
+            "displayName": "class add"
         },
         {
-            "id": "27896369-5788-47ef-b124-5dea9e5fc1f5",
-            "name": "edit"
+            "id": "b39c504d-393d-4550-9ed3-47ca213addf3",
+            "name": "class:delete",
+            "displayName": "class delete"
+        },
+        {
+            "id": "1c610ff6-57cf-4715-80da-ddd0c4bf7ac4",
+            "name": "class:view",
+            "displayName": "class view"
+        },
+        {
+            "id": "0574d75d-7153-47e7-91f3-6f8e6642dd3f",
+            "name": "class:update",
+            "displayName": "class update"
+        },
+        {
+            "id": "bcb0ce55-7594-49dd-a112-ccc95a82e4c6",
+            "name": "view"
         }
     ],
     "decisionStrategy": "UNANIMOUS"
